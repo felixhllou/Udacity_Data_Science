@@ -11807,9 +11807,9 @@ Dependent variable: Response time</p>
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>We want to see if there is a difference in response time when participants are shown words in different considitions, in this case, words whose names match the colors in which they are printed and words whose names do not match the colors in which they are printed.</p>
 <p>We can run a hypothesis testing on the mean response time associated with each condition and see if there is a difference. The hypotheses should be set up as the followings (µ here represents average response time):</p>
-<p>H0: <strong>$mu_{incongruent}$</strong> = <strong>$mu_{congruent}$</strong>
-<br>
-H1: <strong>$mu_{incongruent}$</strong> ≠ <strong>$mu_{congruent}$</strong></p>
+<p>H0: There is no significant difference in the population average response time on stating the colors in a congruent or incongruent condition</p>
+<p>H1: There is significant difference in the population average response time on stating the colors in a congruent or incongruent condition</p>
+<p>Since we do not know anything about the population (Including the standard deviation ), and we have a relatively small sample with a size of 24 participants, performing a z-test is not really a good call.</p>
 <p>And we are going to perform a paired t-test as this is a comparison of two different methods of measurement where the measurements are applied to the same subjects.</p>
 
 </div>
@@ -12040,7 +12040,7 @@ dtype: bool</pre>
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&lt;matplotlib.text.Text at 0x10ab40dd8&gt;</pre>
+<pre>&lt;matplotlib.text.Text at 0x117758d30&gt;</pre>
 </div>
 
 </div>
@@ -12258,7 +12258,7 @@ N3awvHSYfmqaAAAALklEQVSDWvAiIjmlFryISE4pwYuI5JQSvIhITinBi4jklBK8iEhOKcGLiOTU
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&lt;matplotlib.text.Text at 0x10ac48cf8&gt;</pre>
+<pre>&lt;matplotlib.text.Text at 0x117861ac8&gt;</pre>
 </div>
 
 </div>
@@ -12626,6 +12626,522 @@ HmUJ3hhjPMoSvDHGeNT/A2RwDd1BqwjPAAAAAElFTkSuQmCC
 <p>If the t-statistic lies outside the quantiles (Critical values) of the t-distribution corresponding to our confidence level and degrees of freedom, we reject the null hypothesis.</p>
 <p>A p-value of 0.0000 means we'd expect to see data as extreme as our sample due to chance about basically 0% of the time assuming the null hypothesis is true.</p>
 <p>In this case, the p-value is lower than our significance level α (1 - confidence level or 0.05, even 0.01) so we should reject the null hypothesis.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Let's double check by performing bootstrap sampling.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[10]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1">### Create a mean difference function.</span>
+
+<span class="k">def</span> <span class="nf">diff_of_means</span><span class="p">(</span><span class="n">data_1</span><span class="p">,</span> <span class="n">data_2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Difference in means of two arrays.&quot;&quot;&quot;</span>
+
+    <span class="c1"># The difference of means of data_1, data_2: diff</span>
+    <span class="n">diff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">data_1</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">data_2</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">diff</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[11]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1">### Create a bootstrap function for drawing bootstrap replicates.</span>
+
+<span class="k">def</span> <span class="nf">bootstrap_replicate_1d</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">func</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)))</span>
+
+<span class="k">def</span> <span class="nf">draw_bs_reps</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Draw bootstrap replicates.&quot;&quot;&quot;</span>
+
+    <span class="c1"># Initialize array of replicates</span>
+    <span class="n">bs_replicates</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
+
+    <span class="c1"># Generate replicates</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">size</span><span class="p">):</span>
+        <span class="n">bs_replicates</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">bootstrap_replicate_1d</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">func</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">bs_replicates</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[12]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Compute the difference of the means</span>
+<span class="n">mean_diff</span> <span class="o">=</span> <span class="n">diff_of_means</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">Incongruent</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">Congruent</span><span class="p">)</span>
+
+<span class="c1"># Get bootstrap replicates of means</span>
+<span class="n">bs_replicates_incon</span> <span class="o">=</span> <span class="n">draw_bs_reps</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">Incongruent</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="mi">10000</span><span class="p">)</span>
+<span class="n">bs_replicates_con</span> <span class="o">=</span> <span class="n">draw_bs_reps</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">Congruent</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="mi">10000</span><span class="p">)</span>
+
+<span class="c1"># Compute samples of difference of means</span>
+<span class="n">bs_diff_replicates</span> <span class="o">=</span> <span class="n">bs_replicates_incon</span> <span class="o">-</span> <span class="n">bs_replicates_con</span>
+
+<span class="c1"># Compute 95% confidence interval</span>
+<span class="n">conf_int</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">bs_diff_replicates</span><span class="p">,</span> <span class="p">[</span><span class="mf">2.5</span><span class="p">,</span> <span class="mf">97.5</span><span class="p">])</span>
+
+<span class="c1"># Print the results</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Difference of means =&#39;</span><span class="p">,</span> <span class="n">mean_diff</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;95</span><span class="si">% c</span><span class="s1">onfidence interval =&#39;</span><span class="p">,</span> <span class="n">conf_int</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Difference of means = 7.964791666666665
+95% confidence interval = [  5.70418958  10.45997396]
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[13]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1">### Bootstrap replicates distribution</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">bs_diff_replicates</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[13]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>(array([   41.,   287.,  1201.,  2680.,  2957.,  1913.,   682.,   204.,
+           29.,     6.]),
+ array([  3.98633333,   4.91452917,   5.842725  ,   6.77092083,
+          7.69911667,   8.6273125 ,   9.55550833,  10.48370417,
+         11.4119    ,  12.34009583,  13.26829167]),
+ &lt;a list of 10 Patch objects&gt;)</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+
+
+<div class="output_png output_subarea ">
+<img src="data:image/png;base64,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
+xmCXpML8H+gCOKwdtlsCAAAAAElFTkSuQmCC
+"
+>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[14]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1">### Bootstrap replicates standard deviation</span>
+
+<span class="n">bs_diff_replicates</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[14]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>1.1918606855744385</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[15]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1">### Sampling distribution under null hypothesis</span>
+
+<span class="n">null_vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">bs_diff_replicates</span><span class="o">.</span><span class="n">std</span><span class="p">(),</span> <span class="nb">len</span><span class="p">(</span><span class="n">bs_diff_replicates</span><span class="p">))</span>
+
+<span class="n">ptile_low</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">null_vals</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">)</span>
+
+<span class="n">ptile_high</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">null_vals</span><span class="p">,</span> <span class="mf">97.5</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">null_vals</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">mean_diff</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Observed difference&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">ptile_low</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;yellow&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;2.5th percentile&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">ptile_high</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;yellow&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;97.5th percentile&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[15]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&lt;matplotlib.legend.Legend at 0x117b876a0&gt;</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+
+
+<div class="output_png output_subarea ">
+<img src="data:image/png;base64,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
+"
+>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[16]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">null_vals</span><span class="p">,</span> <span class="p">[</span><span class="mf">2.5</span><span class="p">,</span> <span class="mf">97.5</span><span class="p">])</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[16]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>array([-2.34706717,  2.38581464])</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The result aligns with the one from our t-test, in which we reject the null hypothesis.</p>
 
 </div>
 </div>
