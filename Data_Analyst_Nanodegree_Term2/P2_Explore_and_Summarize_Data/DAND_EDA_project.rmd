@@ -1,9 +1,15 @@
 ---
-output: html_document
+title: "Investigate Red Wine Quality by Felix Lou"
+author: "Felix Lou"
+output: 
+  html_document: 
+    toc: true
+    toc_depth: 3
+    toc_float: true
 editor_options: 
   chunk_output_type: console
 ---
-Investigate Red Wine Quality by Felix Lou
+
 ========================================================
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, packages}
@@ -24,7 +30,7 @@ library(gridExtra)
 df <- read.csv('wineQualityReds.csv')
 ```
 
-## About
+# About
 >In this project, I am going to explore a dataset in which contains information 
 on red wine quality and chemical properties associated with them. With the help 
 of the statistical program R, I am going to first conduct preliminary 
@@ -91,8 +97,8 @@ qplot(x = df$quality,
       xlab = 'Quality')
 ```
 
-## Univariate Analysis
-### Quality of Wine
+# Univariate Analysis
+## Quality of Wine
 >Looking at the histogram of wine quality, we can see that most of the wines 
 receive about average ratings which are based on a discrete range, and there are 
 not really any extreme cases (Outliers). Although not obvious, there is some 
@@ -121,7 +127,7 @@ qplot(x = df$rating,
       xlab = 'Rating')
 ```
 
-### Acidity of Wine
+## Acidity of Wine
 >Acids are major wine constituents and contribute greatly to its taste. 
 According to the documentation and by researching 
 [online](http://waterhouse.ucdavis.edu/whats-in-wine/fixed-acidity), 
@@ -141,7 +147,7 @@ ggplot(aes(x = overall.acidity),
 ```
 
 
-### High Level Comparison on Good and Bad
+## High Level Comparison on Good and Bad
 >Although by looking at the above histograms, we can tell the general 
 properties that wines have, we cannot really tell what separates the good ones 
 from the bad ones. 
@@ -181,7 +187,7 @@ we look at the plots individually, we can see that the ranges of spikes are
 especially wide among `citric.acid` and `alcohol` (On its own scale). This 
 suggests that the two variables might serve as indicators of wine quality.
 
-### Outliers
+## Outliers
 >As we saw from the plots above, some variables' distribution is skewed. This 
 suggests that there might be outliers in the dataset. Let's validate this with 
 the help of boxplot.
@@ -461,7 +467,8 @@ ggplot(data = df,
                   se = FALSE)  +
   scale_color_brewer(type = 'seq', 
                      guide = guide_legend(title = 'Quality')) + 
-  facet_wrap(~rating)
+  facet_wrap(~rating) + 
+  theme_dark()
 
 ggplot(data = df, 
        aes(x = free.sulfur.dioxide, 
@@ -476,7 +483,8 @@ ggplot(data = df,
   scale_color_brewer(type = 'seq', 
                      guide = guide_legend(title = 'Quality')) + 
   facet_wrap(~rating) + 
-  scale_y_continuous(lim = c(0, quantile(df$total.sulfur.dioxide, 0.99)))
+  scale_y_continuous(lim = c(0, quantile(df$total.sulfur.dioxide, 0.99))) + 
+  theme_dark()
 
 ggplot(data = df, 
        aes(x = alcohol, 
@@ -490,7 +498,8 @@ ggplot(data = df,
                   se = FALSE)  +
   scale_color_brewer(type = 'seq', 
                      guide = guide_legend(title = 'Quality')) + 
-  facet_wrap(~rating)
+  facet_wrap(~rating) + 
+  theme_dark()
 
 ggplot(data = df, 
        aes(x = overall.acidity, 
@@ -504,7 +513,8 @@ ggplot(data = df,
                   se = FALSE)  +
   scale_color_brewer(type = 'seq', 
                      guide = guide_legend(title = 'Quality')) + 
-  facet_wrap(~rating)
+  facet_wrap(~rating) + 
+  theme_dark()
 ```
 
 >The patterns are consistent across groups.
