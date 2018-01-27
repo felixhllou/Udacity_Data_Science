@@ -76,7 +76,7 @@ str(df$quality)
 >Let's make a set of histograms for all the variables to have a general idea on 
 the distribution first.
 
-```{r echo=FALSE, message=FALSE, Univariate_Plots}
+```{r echo=FALSE, message=FALSE, fig.width=14, fig.height=10, Univariate_Plots}
 # Melt the dataframe and map 'value' as the x variable
 ggplot(data = melt(df), 
        aes(x = value)) + 
@@ -113,7 +113,7 @@ df$rating <- ordered(df$rating,
 table(df$rating)
 ```
 
-```{r echo=FALSE, message=FALSE}
+```{r echo=FALSE, message=FALSE, fig.width=14, fig.height=10}
 # Plot the rating
 qplot(x = df$rating, 
       color = I('black'), 
@@ -129,7 +129,7 @@ According to the documentation and by researching
 (tartaric and acetic); so let's instantiate another variable that stands for 
 overall acidity of wine.
 
-```{r echo=FALSE, message=FALSE}
+```{r echo=FALSE, message=FALSE, fig.width=14, fig.height=10}
 # Overall acidity variable
 df$overall.acidity <- df$fixed.acidity + df$volatile.acidity + df$citric.acid
 
@@ -149,7 +149,7 @@ from the bad ones.
 >We need to perform a comparison in order to tell the difference. Let's first 
 compare the overall acidity between the good ones and bad ones.
 
-```{r echo=FALSE, message=FALSE}
+```{r echo=FALSE, message=FALSE, fig.width=14, fig.height=10}
 # Comparison on overall acidity
 ggplot(data = subset(df, rating != 'average'), 
        aes(x = overall.acidity, 
@@ -160,7 +160,7 @@ ggplot(data = subset(df, rating != 'average'),
 >I believe there are reasons why wine experts divide acidity into two groups; so 
 let's dig deeper by plotting the acids individually along with other variables.
 
-```{r echo=FALSE, message=FALSE}
+```{r echo=FALSE, message=FALSE, fig.width=14, fig.height=10}
 # Comparison on low level along with other variables
 ggplot(data = melt(subset(df, rating != 'average')), 
        aes(x = value, fill = rating)) + 
@@ -186,7 +186,7 @@ suggests that the two variables might serve as indicators of wine quality.
 suggests that there might be outliers in the dataset. Let's validate this with 
 the help of boxplot.
 
-```{r echo=FALSE, message=FALSE}
+```{r echo=FALSE, message=FALSE, fig.width=14, fig.height=10}
 # Boxplot to spot outliers
 ggplot(data = melt(df), 
        aes(x = 'Wine', y = value)) + 
@@ -199,26 +199,51 @@ ggplot(data = melt(df),
 
 # Bivariate Analysis
 
+>As mentioned in the beginning, there may be multicollinearity among variables; 
+so let's get a quick snapshot of the correlations among them.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=14, fig.height=10}
+# Correlation table among variables
+ggcorr(df)
+```
+
+>Indeed, multicollinearities exist in this dataset. Basically, the darker/ 
+sharper the grid, the stronger the correlations associated with the pair of 
+variables. One interesting finding is that there seems to be a negative 
+correlation between `citric.acid` and `volatile.acidity`, and `volatile.acidity` 
+seems to have a slightly positive relationship with `pH`. This is actually 
+quite counterintuitive. 
+
 >From the density plots, we can see some variables may have an impact on wine 
 quality. Let's see if we can capture the trend/ tendency with the help of 
 boxplot.
 
-```{r echo=FALSE, message=FALSE}
+```{r echo=FALSE, message=FALSE, fig.width=14, fig.height=10}
 # Boxplot on rating
 ggplot(data = melt(df), 
        aes(x = rating, 
-           y = value, 
-           fill = rating)) + 
-  geom_boxplot() + 
+           y = value)) + 
+  geom_jitter(alpha = 0.2) + 
+  geom_boxplot(alpha = 0.4, color = 'blue') + 
+  stat_summary(fun.y = "mean", 
+               geom = "point", 
+               color = "red", 
+               shape = 8, 
+               size = 4) + 
   xlab('Rating') + 
   facet_wrap(~variable, scales = 'free')
 
 # Boxplot on quality
 ggplot(data = melt(df), 
        aes(x = quality, 
-           y = value, 
-           fill = quality)) + 
-  geom_boxplot() + 
+           y = value)) + 
+  geom_jitter(alpha = 0.2) + 
+  geom_boxplot(alpha = 0.4, color = 'blue') + 
+  stat_summary(fun.y = "mean", 
+               geom = "point", 
+               color = "red", 
+               shape = 8, 
+               size = 4) + 
   xlab('Quality') + 
   facet_wrap(~variable, scales = 'free')
 ```
@@ -231,7 +256,7 @@ the greater the impact of that specific variable on wine quality. Here,
 check by calculating the correlation coefficient of each variable against 
 `quality`.
 
-```{r echo=FALSE, message=FALSE}
+```{r echo=FALSE, message=FALSE, fig.width=14, fig.height=10}
 # Create a boolean filter for numeric columns
 df_num_columns <- sapply(df, is.numeric)
 
@@ -246,22 +271,27 @@ cor(df[ , df_num_columns], as.numeric(df$quality))
 - Good wines usually have relatively high sulphates level
 - Good wines usually have relatively low volatile acidity
 
->One thing that interests me is that although good wines generally have 
+>As mentioned previously, although good wines generally have 
 relatively high acidity, they also in general possess lower level of 
-`volatile.acidity`. As mentioned in the documentation, the amount of acetic acid 
+`volatile.acidity`. Looking into the documentation, the amount of acetic acid 
 in wine, which at too high of levels can lead to an unpleasant, vinegar taste. 
 It seems `volatile.acidity` is negatively correlated with other acids. 
 
 >Let's plot `volatile.acidity` against `citric.acid` and `fixed.acidity`.
 
-```{r echo=FALSE, message=FALSE}
+```{r echo=FALSE, message=FALSE, fig.width=14, fig.height=10}
 # Scatter plot on volatile.acidity against citric.acid
 ggplot(data = df, 
        aes(x = volatile.acidity, 
            y = citric.acid)) + 
-  geom_point(color = '#099DD9', 
+  geom_point(alpha = 0.5, 
+             size = 1, 
+             color = '#099DD9', 
              position = position_jitter(height = 0)) + 
-  geom_smooth(method = 'lm', color = 'red')
+  geom_smooth(method = 'lm', 
+              color = 'red', 
+              size = 1, 
+              se = FALSE)
 
 # Correlation coefficient
 with(df, cor.test(df$volatile.acidity, df$citric.acid))
@@ -270,15 +300,20 @@ with(df, cor.test(df$volatile.acidity, df$citric.acid))
 ggplot(data = df, 
        aes(x = volatile.acidity, 
            y = fixed.acidity)) + 
-  geom_point(color = '#099DD9', 
+  geom_point(alpha = 0.5, 
+             size = 1, 
+             color = '#099DD9', 
              position = position_jitter(height = 0)) + 
-  geom_smooth(method = 'lm', color = 'red')
+  geom_smooth(method = 'lm', 
+              color = 'red', 
+              size = 1, 
+              se = FALSE)
 
 # Correlation coefficient
 with(df, cor.test(df$volatile.acidity, df$fixed.acidity))
 ```
 
->As expected, `volatile.acidity` is negatively correlated with other acids. 
+>`volatile.acidity` is indeed negatively correlated with other acids. 
 This is especially true for `citric.acid`, given the correlation coefficient is 
 -0.552.
 
@@ -286,14 +321,19 @@ This is especially true for `citric.acid`, given the correlation coefficient is
 `free.sulfur.dioxide`. This implies that there should be a correlation between 
 the two variables.
 
-```{r echo=FALSE, message=FALSE}
+```{r echo=FALSE, message=FALSE, fig.width=14, fig.height=10}
 # Scatter plot on `total.sulfur.dioxide` against `free.sulfur.dioxide`
 ggplot(data = df, 
        aes(x = free.sulfur.dioxide, 
            y = total.sulfur.dioxide)) + 
-  geom_point(color = '#099DD9', 
+  geom_point(alpha = 0.5, 
+             size = 1, 
+             color = '#099DD9', 
              position = position_jitter(height = 0)) + 
-  geom_smooth(method = 'lm', color = 'red')
+  geom_smooth(method = 'lm', 
+              color = 'red', 
+              size = 1, 
+              se = FALSE)
 
 # Correlation coefficient
 with(df, cor.test(df$free.sulfur.dioxide, df$total.sulfur.dioxide))
@@ -306,14 +346,19 @@ two variables.
 alcohol level and sugar content. This suggests that there may be a correlation 
 between `density` against `residual.sugar` and `alcohol`.
 
-```{r echo=FALSE, message=FALSE}
+```{r echo=FALSE, message=FALSE, fig.width=14, fig.height=10}
 # Scatter plot on `residual.sugar` against `density`
 ggplot(data = df, 
        aes(x = residual.sugar, 
            y = density)) + 
-  geom_point(color = '#099DD9', 
+  geom_point(alpha = 0.5, 
+             size = 1, 
+             color = '#099DD9', 
              position = position_jitter(height = 0)) + 
-  geom_smooth(method = 'lm', color = 'red')
+  geom_smooth(method = 'lm', 
+              color = 'red', 
+              size = 1, 
+              se = FALSE)
 
 # Correlation coefficient
 with(df, cor.test(df$residual.sugar, df$density))
@@ -322,9 +367,14 @@ with(df, cor.test(df$residual.sugar, df$density))
 ggplot(data = df, 
        aes(x = alcohol, 
            y = density)) + 
-  geom_point(color = '#099DD9', 
+  geom_point(alpha = 0.5, 
+             size = 1, 
+             color = '#099DD9', 
              position = position_jitter(height = 0)) + 
-  geom_smooth(method = 'lm', color = 'red')
+  geom_smooth(method = 'lm', 
+              color = 'red', 
+              size = 1, 
+              se = FALSE)
 
 # Correlation coefficient
 with(df, cor.test(df$alcohol, df$density))
@@ -336,14 +386,19 @@ with `density`, and `alcohol` is negatively correlated with `density`.
 >pH should be hugely affected by wines acidity as `pH` is essentially a measure 
 of acidity; so let's plot `overall.acidity` against `pH`.
 
-```{r echo=FALSE, message=FALSE}
+```{r echo=FALSE, message=FALSE, fig.width=14, fig.height=10}
 # Scatter plot on `overall.acidity` against `pH`
 ggplot(data = df, 
        aes(x = overall.acidity, 
            y = pH)) + 
-  geom_point(color = '#099DD9', 
+  geom_point(alpha = 0.5, 
+             size = 1, 
+             color = '#099DD9', 
              position = position_jitter(height = 0)) + 
-  geom_smooth(method = 'lm', color = 'red')
+  geom_smooth(method = 'lm', 
+              color = 'red', 
+              size = 1, 
+              se = FALSE)
 
 # Correlation coefficient
 with(df, cor.test(df$overall.acidity, df$pH))
@@ -358,7 +413,7 @@ with(df, cor.test(df$overall.acidity, df$pH))
 coorelation suggests that we might use a linear model to predict `pH` based on 
 `overall.acidity`.
 
-```{r echo=FALSE, message=FALSE}
+```{r echo=FALSE, message=FALSE, fig.width=14, fig.height=10}
 # Build and fit the linear model for `pH` and `overall.acidity`
 model <- lm(I(pH) ~ I(overall.acidity), data = df)
 
@@ -371,9 +426,15 @@ df$pH.residual <- (df$pH.estimate - df$pH) / df$pH
 # Boxplot on residuals
 ggplot(data = df, 
        aes(x = quality, 
-           y = pH.residual, 
-           fill = quality)) +
-  geom_boxplot()
+           y = pH.residual)) +
+  geom_jitter(alpha = 0.5) + 
+  geom_boxplot(alpha = 0.5, color = 'blue') + 
+  stat_summary(fun.y = "mean", 
+               geom = "point", 
+               color = "red", 
+               shape = 8, 
+               size = 4) + 
+  xlab('Quality')
 ```
 
 >According to the boxplot, the residuals are generally consistent across 
@@ -386,34 +447,63 @@ Chances are there might be omitted variables.
 visualize them on rating and quality basis, and see if the pattern is 
 consistant across groups.
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, Multivariate_Plots}
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=14, fig.height=10, Multivariate_Plots}
+
 ggplot(data = df, 
        aes(x = volatile.acidity, 
            y = citric.acid, 
-           color = quality)) + 
-  geom_point(position = position_jitter(height = 0)) + 
+           color = quality)) +
+      geom_point(alpha = 0.8, 
+                 size = 1, 
+                 position = position_jitter(height = 0)) +
+      geom_smooth(method = "lm", 
+                  size = 1, 
+                  se = FALSE)  +
+  scale_color_brewer(type = 'seq', 
+                     guide = guide_legend(title = 'Quality')) + 
   facet_wrap(~rating)
 
 ggplot(data = df, 
        aes(x = free.sulfur.dioxide, 
            y = total.sulfur.dioxide, 
-           color = quality)) + 
-  geom_point(position = position_jitter(height = 0)) + 
+           color = quality)) +
+      geom_point(alpha = 0.8, 
+                 size = 1, 
+                 position = position_jitter(height = 0)) +
+      geom_smooth(method = "lm", 
+                  size = 1, 
+                  se = FALSE)  +
+  scale_color_brewer(type = 'seq', 
+                     guide = guide_legend(title = 'Quality')) + 
   facet_wrap(~rating) + 
   scale_y_continuous(lim = c(0, quantile(df$total.sulfur.dioxide, 0.99)))
 
 ggplot(data = df, 
        aes(x = alcohol, 
            y = density, 
-           color = quality)) + 
-  geom_point(position = position_jitter(height = 0)) + 
+           color = quality)) +
+      geom_point(alpha = 0.8, 
+                 size = 1, 
+                 position = position_jitter(height = 0)) +
+      geom_smooth(method = "lm", 
+                  size = 1, 
+                  se = FALSE)  +
+  scale_color_brewer(type = 'seq', 
+                     guide = guide_legend(title = 'Quality')) + 
   facet_wrap(~rating)
 
 ggplot(data = df, 
        aes(x = overall.acidity, 
            y = pH, 
-           color = quality)) + 
-  geom_point(position = position_jitter(height = 0)) + 
+           color = quality)) +
+      geom_point(alpha = 0.8, 
+                 size = 1, 
+                 position = position_jitter(height = 0)) +
+      geom_smooth(method = "lm", 
+                  size = 1, 
+                  se = FALSE)  +
+  scale_color_brewer(type = 'seq', 
+                     guide = guide_legend(title = 'Quality')) + 
   facet_wrap(~rating)
 ```
 
@@ -425,7 +515,7 @@ ggplot(data = df,
 `volatile.acidity`, and `sulphates`. Let's see how the good ones and bad ones 
 are distributed in a scatter plot.
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=14, fig.height=10}
 ggplot(data = subset(df, rating != 'average'), 
        aes(x = citric.acid, 
            y = alcohol, 
@@ -454,7 +544,7 @@ pretty clear picture on what separate good wines from bad wines.
 # Final Plots and Summary
 
 ### Plot One - Probability Density Function on Citric Acid and Alcohol
-```{r echo=FALSE, message=FALSE, warning=FALSE, Plot_One}
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=14, fig.height=10, Plot_One}
 p1a <- ggplot(aes(x = citric.acid, 
                   fill = rating), 
               data = subset(df, rating != 'average')) + 
@@ -479,22 +569,32 @@ variables. The variable is a fairly good indicator when the distributions do
 not overlap and start to get farther from each other.
 
 ### Plot Two - Volatile Acidity & Sulphates Level against Quality
-```{r echo=FALSE, message=FALSE, warning=FALSE, Plot_Two}
-p2a <- ggplot(aes(x = quality, 
-                  y = volatile.acidity, 
-                  fill = quality), 
-              data = df) + 
-  geom_boxplot() + 
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=14, fig.height=10, Plot_Two}
+p2a <- ggplot(data = df, 
+              aes(x = quality, 
+                  y = volatile.acidity)) + 
+  geom_jitter(alpha = 0.2) + 
+  geom_boxplot(alpha = 0.4, color = 'blue') + 
+  stat_summary(fun.y = "mean", 
+               geom = "point", 
+               color = "red", 
+               shape = 8, 
+               size = 4) + 
   scale_y_continuous(lim = c(0, quantile(df$volatile.acidity, 0.99))) + 
   xlab('Wine Quality') + 
   ylab('Volatile acidity (acetic acid - g / dm^3)') + 
   ggtitle('Volatility Acidity Level among Different Wine Qualities')
 
-p2b <- ggplot(aes(x = quality, 
-                  y = sulphates, 
-                  fill = quality), 
-              data = df) + 
-  geom_boxplot() + 
+p2b <- ggplot(data = df, 
+              aes(x = quality, 
+                  y = sulphates)) + 
+  geom_jitter(alpha = 0.2) + 
+  geom_boxplot(alpha = 0.4, color = 'blue') + 
+  stat_summary(fun.y = "mean", 
+               geom = "point", 
+               color = "red", 
+               shape = 8, 
+               size = 4) + 
   scale_y_continuous(lim = c(0, quantile(df$sulphates, 0.95))) + 
   xlab('Wine Quality') + 
   ylab('Sulphates (Potassium Sulphate - g / dm3)') + 
@@ -510,7 +610,7 @@ not be neglected.
 
 
 ### Plot Three - Good & Bad Wines Generalization
-```{r echo=FALSE, message=FALSE, warning=FALSE, Plot_Three}
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=14, fig.height=10, Plot_Three}
 p3a <- ggplot(data = subset(df, rating != 'average'), 
        aes(x = citric.acid, 
            y = alcohol, 
@@ -549,3 +649,14 @@ industry standard. Generally speaking, acidity, sulphates level, and alcohol
 level are the ones that could alter wine quality most. There could be more 
 probabilistic work if we want to run hypothesis testing on certain statistical 
 summaries like the difference in alcohol means among groups.
+>One thing that is worth mentioning is multicollinearity is found in the dataset. 
+If we want to build a linear model, ideally speaking, we want the predictor 
+variables to be related to the response variable, but not to be related to one 
+another. Multicollinearity occurs when predictor variables are related to one 
+another. Expected relationships may not hold under the presence of 
+Multicollinearity. Worse, any hypothesis testing becomes unreliable. As we saw in 
+the correlation table, quite a few varibles are correlated with one another. 
+If we are to build a multi-linear regression model, we would have to deal with 
+this issue. One common way to working with correlated predictor variables in a multi-linear regression model, is simply to remove one of the variables that is 
+most related to the other variables. Choosing an predictor variable that is not 
+as important is a common choice.
