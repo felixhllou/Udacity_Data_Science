@@ -1,6 +1,6 @@
 # Data Analyst Nanodegree
 
-![certificate](https://rawgit.com/felixhllou/Udacity_Data_Science/master/DAND_Cert.pdf)
+![certificate](https://rawgit.com/felixhllou/Udacity_Data_Science/master/DAND_Cert.png)
 
 ### About
 This repository contains project work for Udacity's [Data Analyst Nanodegree](https://www.udacity.com/course/data-analyst-nanodegree--nd002)
